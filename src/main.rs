@@ -29,7 +29,7 @@ fn main() {
 
     println!("gm: {}", &game_mode);
 
-    let game_mode: u32 = game_mode.trim().parse()
+    let game_mode: i32 = game_mode.trim().parse()
         .expect("Please type a number");
 
     let mode = lotto_modes.get(&game_mode)
@@ -41,7 +41,7 @@ fn main() {
     io::stdin().read_line(&mut set)
         .expect("Failed to readline");
 
-    let set: u32 = set.trim().parse()
+    let set: i32 = set.trim().parse()
         .expect("Please type a number");
 
     for number in generate_numbers(&set, mode).iter() {
@@ -49,17 +49,30 @@ fn main() {
     }
 }
 
-fn generate_numbers(set: &u32, mode: &i32) -> Vec<Vec<i32>> {
+fn generate_numbers(set: &i32, mode: &i32) -> Vec<Vec<i32>> {
     let mut numbers = Vec::new();
     let mut rng = thread_rng();
 
     for _ in 1..set+1 {
         let mut stack = Vec::new();
         for _ in 1..7  {
-            stack.push(rng.gen_range(1, *mode))
+            let mut number = rng.gen_range(1, *mode);
+            while has_duplicate(&stack, &number) {
+                number = rng.gen_range(1, *mode);
+            }
+            stack.push(number)
         }
         numbers.push(stack)
     }
 
     numbers
+}
+
+fn has_duplicate(stack: &Vec<i32>, number: &i32) -> bool {
+    let idx = match stack.iter().position(|&r| r == *number) {
+        Some(n) => n,
+        None => 0
+    };
+
+    idx != 0
 }
